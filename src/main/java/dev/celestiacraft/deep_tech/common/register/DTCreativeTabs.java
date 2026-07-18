@@ -31,6 +31,11 @@ public class DTCreativeTabs {
 			return CreativeModeTab.builder()
 					.icon(icon)
 					.title(Component.translatable(tranKey))
+					.displayItems((params, output) -> {
+						output.accept(DTItems.SCULK_CHUNK.get());
+						output.accept(DTItems.SCULK_ALLOY.get());
+						output.accept(DTBlocks.MACHINE_FRAME.get().asItem());
+					})
 					.build();
 		});
 	}

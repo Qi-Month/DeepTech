@@ -1,6 +1,7 @@
 package dev.celestiacraft.deep_tech;
 
 import com.tterrag.registrate.Registrate;
+import dev.celestiacraft.deep_tech.common.register.DTBlocks;
 import dev.celestiacraft.deep_tech.common.register.DTCreativeTabs;
 import dev.celestiacraft.deep_tech.common.register.DTItems;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +30,7 @@ public class DeepTech {
 		IEventBus bus = context.getModEventBus();
 
 		DTItems.register();
+		DTBlocks.register();
 		// 创造模式标签页注册请确保一定在最下面
 		DTCreativeTabs.register(bus);
 	}
