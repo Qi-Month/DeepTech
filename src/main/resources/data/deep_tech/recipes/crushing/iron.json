@@ -1,0 +1,10 @@
+{
+  "type": "deep_tech:crushing",
+  "input": {
+    "item": "minecraft:raw_iron"
+  },
+  "output_item": "minecraft:iron_nugget",
+  "output_count": 12,
+  "energy_cost": 100,
+  "processing_time": 100
+}

@@ -1,0 +1,10 @@
+{
+  "type": "deep_tech:crushing",
+  "input": {
+    "item": "minecraft:gravel"
+  },
+  "output_item": "minecraft:sand",
+  "output_count": 1,
+  "energy_cost": 25,
+  "processing_time": 50
+}

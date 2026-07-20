@@ -35,6 +35,7 @@ public class DTCreativeTabs {
 						output.accept(DTItems.SCULK_CHUNK.get());
 						output.accept(DTItems.SCULK_ALLOY.get());
 						output.accept(DTBlocks.MACHINE_FRAME.get().asItem());
+						output.accept(DTBlocks.MACHINE_CRUSHER.get().asItem());
 					})
 					.build();
 		});
