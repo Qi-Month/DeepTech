@@ -8,7 +8,7 @@
 //import net.minecraft.world.entity.player.Player;
 //
 //import dev.celestiacraft.deep_tech.DeepTech;
-//import dev.celestiacraft.deep_tech.common.block_entity.CrusherBlockEntity;
+//import dev.celestiacraft.deep_tech.common.block.machine.crusher.CrusherBlockEntity;
 //
 //
 //public class CrusherUIFactory extends UIFactory<CrusherBlockEntity> {

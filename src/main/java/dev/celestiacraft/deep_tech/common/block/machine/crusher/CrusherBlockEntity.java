@@ -1,29 +1,19 @@
-package dev.celestiacraft.deep_tech.common.block_entity;
+package dev.celestiacraft.deep_tech.common.block.machine.crusher;
 
-import com.lowdragmc.lowdraglib.gui.editor.data.UIProject;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
-import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
-import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
-import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
-import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
-import com.lowdragmc.lowdraglib.side.item.ItemTransferHelper;
 import com.lowdragmc.lowdraglib.utils.Position;
-import dev.celestiacraft.deep_tech.common.block.MachineCrusher;
+import dev.celestiacraft.deep_tech.common.block_entity.MachineBlockEntity;
 import dev.celestiacraft.deep_tech.common.inventory.SimpleMachineInventory;
-import dev.celestiacraft.deep_tech.common.menu.MachineMenu;
 import dev.celestiacraft.deep_tech.common.register.DTBlockEntities;
 import dev.celestiacraft.deep_tech.common.register.DTRecipes;
 import dev.celestiacraft.deep_tech.common.recipe.CrusherRecipe;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -31,12 +21,6 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import com.lowdragmc.lowdraglib.gui.factory.BlockEntityUIFactory;
-import com.lowdragmc.lowdraglib.gui.factory.UIFactory;
-import net.minecraft.world.entity.player.Player;
-import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
-
-import java.util.function.Supplier;
 
 public class CrusherBlockEntity
         extends MachineBlockEntity
@@ -69,8 +53,8 @@ public class CrusherBlockEntity
 
         // 如果没有配方，重置状态
         if (recipe == null) {
-            if (state.getValue(MachineCrusher.ACTIVE)) {
-                level.setBlock(pos, state.setValue(MachineCrusher.ACTIVE, false), 3);
+            if (state.getValue(CrusherBlock.ACTIVE)) {
+                level.setBlock(pos, state.setValue(CrusherBlock.ACTIVE, false), 3);
             }
             if (entity.progress > 0) {
                 entity.progress = 0;
@@ -93,8 +77,8 @@ public class CrusherBlockEntity
 
         // 更新激活状态
         boolean isWorking = canOutput && hasEnergy;
-        if (state.getValue(MachineCrusher.ACTIVE) != isWorking) {
-            level.setBlock(pos, state.setValue(MachineCrusher.ACTIVE, isWorking), 3);
+        if (state.getValue(CrusherBlock.ACTIVE) != isWorking) {
+            level.setBlock(pos, state.setValue(CrusherBlock.ACTIVE, isWorking), 3);
         }
 
         // 执行加工

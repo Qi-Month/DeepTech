@@ -1,6 +1,5 @@
 package dev.celestiacraft.deep_tech.common.recipe;
 
-import dev.celestiacraft.deep_tech.DeepTech;
 import dev.celestiacraft.deep_tech.common.register.DTRecipes;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
@@ -14,80 +13,81 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
 public class CrusherRecipe implements Recipe<Container> {
-    private final ResourceLocation id;
-    private final Ingredient input;
-    private final ItemStack output;
-    private final int energyCost;
-    private final int processingTime;
+	private final ResourceLocation id;
+	private final Ingredient input;
+	private final ItemStack output;
+	private final int energyCost;
+	private final int processingTime;
 
-    public CrusherRecipe(
-            ResourceLocation id,
-            Ingredient input,
-            ItemStack output,
-            int energyCost,
-            int processingTime
-    )
-    {
-        this.id = id;
-        this.input = input;
-        this.output = output;
-        this.energyCost = energyCost;
-        this.processingTime = processingTime;
-    }
+	public CrusherRecipe(
+			ResourceLocation id,
+			Ingredient input,
+			ItemStack output,
+			int energyCost,
+			int processingTime
+	) {
+		this.id = id;
+		this.input = input;
+		this.output = output;
+		this.energyCost = energyCost;
+		this.processingTime = processingTime;
+	}
 
-    @Override
-    public boolean matches(Container container, Level level) {
-        return input.test(container.getItem(0));
-    }
+	@Override
+	public boolean matches(Container container, Level level) {
+		return input.test(container.getItem(0));
+	}
 
-    @Override
-    public ItemStack assemble(Container container, RegistryAccess registryAccess) {
-        return output.copy();
-    }
+	@Override
+	public ItemStack assemble(Container container, RegistryAccess registryAccess) {
+		return output.copy();
+	}
 
-    @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return true;
-    }
+	@Override
+	public boolean canCraftInDimensions(int width, int height) {
+		return true;
+	}
 
-    @Override
-    public ItemStack getResultItem(RegistryAccess registryAccess) {
-        return output;
-    }
+	@Override
+	public ItemStack getResultItem(RegistryAccess registryAccess) {
+		return output;
+	}
 
-    @Override
-    public ResourceLocation getId() {
-        return id;
-    }
+	@Override
+	public ResourceLocation getId() {
+		return id;
+	}
 
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-        return DTRecipes.CRUSHER_SERIALIZER.get();
-    }
+	@Override
+	public RecipeSerializer<?> getSerializer() {
+		return DTRecipes.CRUSHER_SERIALIZER.get();
+	}
 
-    @Override
-    public RecipeType<?> getType() {
-        return DTRecipes.CRUSHER_TYPE.get();
-    }
+	@Override
+	public RecipeType<?> getType() {
+		return DTRecipes.CRUSHER_TYPE.get();
+	}
 
-    public Ingredient getInput() {
-        return input;
-    }
+	public Ingredient getInput() {
+		return input;
+	}
 
-    public ItemStack getOutput() {
-        return output;
-    }
+	public ItemStack getOutput() {
+		return output;
+	}
 
-    public int getEnergyCost() {
-        return energyCost;
-    }
+	public int getEnergyCost() {
+		return energyCost;
+	}
 
-    public int getProcessingTime() { return processingTime; }
+	public int getProcessingTime() {
+		return processingTime;
+	}
 
-    @Override
-    public NonNullList<Ingredient> getIngredients() {
-        NonNullList<Ingredient> list = NonNullList.create();
-        list.add(input);
-        return list;
-    }
+	@Override
+	public NonNullList<Ingredient> getIngredients() {
+		NonNullList<Ingredient> list = NonNullList.create();
+		list.add(input);
+		return list;
+	}
 }

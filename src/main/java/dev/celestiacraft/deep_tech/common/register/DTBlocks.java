@@ -3,12 +3,10 @@ package dev.celestiacraft.deep_tech.common.register;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import dev.celestiacraft.deep_tech.DeepTech;
 import dev.celestiacraft.deep_tech.api.client.ItemModelGen;
-import dev.celestiacraft.deep_tech.common.block.MachineCrusher;
+import dev.celestiacraft.deep_tech.common.block.machine.crusher.CrusherBlock;
 import dev.celestiacraft.libs.api.register.block.BasicBlock;
 import net.minecraft.core.Direction;
-import net.minecraftforge.client.model.generators.BlockModelProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
-import net.minecraftforge.client.model.generators.ModelFile;
 
 public class DTBlocks {
 	public static BlockEntry<BasicBlock> MACHINE_FRAME;
@@ -34,9 +32,9 @@ public class DTBlocks {
 				.register();
 	}
 
-	public static final BlockEntry<MachineCrusher> MACHINE_CRUSHER;
+	public static final BlockEntry<CrusherBlock> MACHINE_CRUSHER;
 	static {
-		MACHINE_CRUSHER = DeepTech.REGISTRATE.block("machine_crusher", MachineCrusher::new)
+		MACHINE_CRUSHER = DeepTech.REGISTRATE.block("machine_crusher", CrusherBlock::new)
 				.item()
 				.model(ItemModelGen.withModel("block/machine/machine_crusher_north"))
 				.build()
@@ -69,10 +67,10 @@ public class DTBlocks {
 							.forAllStates(state -> {
 
 								Direction facing =
-										state.getValue(MachineCrusher.FACING);
+										state.getValue(CrusherBlock.FACING);
 
 								boolean active =
-										state.getValue(MachineCrusher.ACTIVE);
+										state.getValue(CrusherBlock.ACTIVE);
 
 
 								return ConfiguredModel.builder()
