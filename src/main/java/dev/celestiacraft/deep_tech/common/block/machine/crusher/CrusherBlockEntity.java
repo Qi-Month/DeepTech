@@ -53,8 +53,8 @@ public class CrusherBlockEntity
 
         // 如果没有配方，重置状态
         if (recipe == null) {
-            if (state.getValue(CrusherBlock.ACTIVE)) {
-                level.setBlock(pos, state.setValue(CrusherBlock.ACTIVE, false), 3);
+            if (state.getValue(CrusherBlock.LIT)) {
+                level.setBlock(pos, state.setValue(CrusherBlock.LIT, false), 3);
             }
             if (entity.progress > 0) {
                 entity.progress = 0;
@@ -77,8 +77,8 @@ public class CrusherBlockEntity
 
         // 更新激活状态
         boolean isWorking = canOutput && hasEnergy;
-        if (state.getValue(CrusherBlock.ACTIVE) != isWorking) {
-            level.setBlock(pos, state.setValue(CrusherBlock.ACTIVE, isWorking), 3);
+        if (state.getValue(CrusherBlock.LIT) != isWorking) {
+            level.setBlock(pos, state.setValue(CrusherBlock.LIT, isWorking), 3);
         }
 
         // 执行加工
