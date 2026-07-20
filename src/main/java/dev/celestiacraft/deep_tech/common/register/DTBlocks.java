@@ -33,6 +33,7 @@ public class DTBlocks {
 	}
 
 	public static final BlockEntry<CrusherBlock> MACHINE_CRUSHER;
+
 	static {
 		MACHINE_CRUSHER = DeepTech.REGISTRATE.block("machine_crusher", CrusherBlock::new)
 				.item()
@@ -65,21 +66,12 @@ public class DTBlocks {
 					);
 					provider.getVariantBuilder(context.get())
 							.forAllStates(state -> {
-
-								Direction facing =
-										state.getValue(CrusherBlock.FACING);
-
-								boolean active =
-										state.getValue(CrusherBlock.ACTIVE);
-
+								Direction facing = state.getValue(CrusherBlock.FACING);
+								boolean active = state.getValue(CrusherBlock.LIT);
 
 								return ConfiguredModel.builder()
-										.modelFile(
-												active ? modelOn : modelOff
-										)
-										.rotationY(
-												(int) facing.toYRot()
-										)
+										.modelFile(active ? modelOn : modelOff)
+										.rotationY((int) facing.toYRot())
 										.build();
 							});
 				})
