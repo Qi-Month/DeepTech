@@ -1,4 +1,4 @@
-package dev.celestiacraft.deep_tech.api.server.recipe.builder.crusher;
+package dev.celestiacraft.deep_tech.api.server.recipe.builder.crushing;
 
 import com.google.gson.JsonObject;
 import dev.celestiacraft.deep_tech.common.register.DTRecipes;
@@ -11,7 +11,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CrusherRecipeResult implements FinishedRecipe {
+public class CrushingRecipeResult implements FinishedRecipe {
 	private final ResourceLocation id;
 	private final Ingredient input;
 	private final ItemStack output;
@@ -21,7 +21,7 @@ public class CrusherRecipeResult implements FinishedRecipe {
 	private final Advancement.Builder advancement;
 	private final ResourceLocation advancementId;
 
-	public CrusherRecipeResult(
+	public CrushingRecipeResult(
 			ResourceLocation id,
 			Ingredient input,
 			ItemStack output,
@@ -68,7 +68,7 @@ public class CrusherRecipeResult implements FinishedRecipe {
 
 	@Override
 	public @NotNull RecipeSerializer<?> getType() {
-		return DTRecipes.CRUSHER_SERIALIZER.get();
+		return DTRecipes.CRUSHING.getSerializer();
 	}
 
 	@Nullable

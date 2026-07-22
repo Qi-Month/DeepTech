@@ -1,4 +1,4 @@
-package dev.celestiacraft.deep_tech.common.recipe.cursher;
+package dev.celestiacraft.deep_tech.common.recipe.crushing;
 
 import dev.celestiacraft.deep_tech.common.register.DTRecipes;
 import lombok.Getter;
@@ -15,14 +15,14 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
-public class CrusherRecipe implements Recipe<Container> {
+public class CrushingRecipe implements Recipe<Container> {
 	private final ResourceLocation id;
 	private final Ingredient input;
 	private final ItemStack output;
 	private final int energyCost;
 	private final int processingTime;
 
-	public CrusherRecipe(
+	public CrushingRecipe(
 			ResourceLocation id,
 			Ingredient input,
 			ItemStack output,
@@ -63,12 +63,12 @@ public class CrusherRecipe implements Recipe<Container> {
 
 	@Override
 	public @NotNull RecipeSerializer<?> getSerializer() {
-		return DTRecipes.CRUSHER_SERIALIZER.get();
+		return DTRecipes.CRUSHING.getSerializer();
 	}
 
 	@Override
 	public @NotNull RecipeType<?> getType() {
-		return DTRecipes.CRUSHER_TYPE.get();
+		return DTRecipes.CRUSHING.getRecipeType();
 	}
 
 	@Override

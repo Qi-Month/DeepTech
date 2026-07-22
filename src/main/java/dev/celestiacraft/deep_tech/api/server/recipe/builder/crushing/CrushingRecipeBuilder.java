@@ -1,4 +1,4 @@
-package dev.celestiacraft.deep_tech.api.server.recipe.builder.crusher;
+package dev.celestiacraft.deep_tech.api.server.recipe.builder.crushing;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public class CrusherRecipeBuilder implements RecipeBuilder {
+public class CrushingRecipeBuilder implements RecipeBuilder {
 	private Ingredient input;
 	private ItemStack output = ItemStack.EMPTY;
 
@@ -27,61 +27,61 @@ public class CrusherRecipeBuilder implements RecipeBuilder {
 
 	private final Advancement.Builder advancement = Advancement.Builder.advancement();
 
-	private CrusherRecipeBuilder() {
+	private CrushingRecipeBuilder() {
 	}
 
-	public static CrusherRecipeBuilder builder() {
-		return new CrusherRecipeBuilder();
+	public static CrushingRecipeBuilder builder() {
+		return new CrushingRecipeBuilder();
 	}
 
-	public CrusherRecipeBuilder input(ItemLike item) {
+	public CrushingRecipeBuilder input(ItemLike item) {
 		input = Ingredient.of(item);
 		return this;
 	}
 
-	public CrusherRecipeBuilder input(TagKey<Item> tag) {
+	public CrushingRecipeBuilder input(TagKey<Item> tag) {
 		input = Ingredient.of(tag);
 		return this;
 	}
 
-	public CrusherRecipeBuilder input(Ingredient ingredient) {
+	public CrushingRecipeBuilder input(Ingredient ingredient) {
 		input = ingredient;
 		return this;
 	}
 
-	public CrusherRecipeBuilder output(ItemLike item) {
+	public CrushingRecipeBuilder output(ItemLike item) {
 		output = new ItemStack(item);
 		return this;
 	}
 
-	public CrusherRecipeBuilder output(ItemLike item, int count) {
+	public CrushingRecipeBuilder output(ItemLike item, int count) {
 		output = new ItemStack(item, count);
 		return this;
 	}
 
-	public CrusherRecipeBuilder output(ItemStack stack) {
+	public CrushingRecipeBuilder output(ItemStack stack) {
 		output = stack.copy();
 		return this;
 	}
 
-	public CrusherRecipeBuilder energyCost(int energyCost) {
+	public CrushingRecipeBuilder energyCost(int energyCost) {
 		this.energyCost = energyCost;
 		return this;
 	}
 
-	public CrusherRecipeBuilder processingTime(int processingTime) {
+	public CrushingRecipeBuilder processingTime(int processingTime) {
 		this.processingTime = processingTime;
 		return this;
 	}
 
 	@Override
-	public @NotNull CrusherRecipeBuilder unlockedBy(@NotNull String name, @NotNull CriterionTriggerInstance instance) {
+	public @NotNull CrushingRecipeBuilder unlockedBy(@NotNull String name, @NotNull CriterionTriggerInstance instance) {
 		advancement.addCriterion(name, instance);
 		return this;
 	}
 
 	@Override
-	public @NotNull CrusherRecipeBuilder group(@Nullable String group) {
+	public @NotNull CrushingRecipeBuilder group(@Nullable String group) {
 		return this;
 	}
 
@@ -105,7 +105,7 @@ public class CrusherRecipeBuilder implements RecipeBuilder {
 				.rewards(AdvancementRewards.Builder.recipe(id))
 				.requirements(RequirementsStrategy.OR);
 
-		consumer.accept(new CrusherRecipeResult(
+		consumer.accept(new CrushingRecipeResult(
 				id,
 				input,
 				output,

@@ -10,7 +10,7 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import dev.celestiacraft.deep_tech.api.block.MachineBlockEntity;
 import dev.celestiacraft.deep_tech.common.gui.EnergyBarWidget;
 import dev.celestiacraft.deep_tech.common.inventory.SimpleMachineInventory;
-import dev.celestiacraft.deep_tech.common.recipe.cursher.CrusherRecipe;
+import dev.celestiacraft.deep_tech.common.recipe.crushing.CrushingRecipe;
 import dev.celestiacraft.deep_tech.common.register.DTBlockEntities;
 import dev.celestiacraft.deep_tech.common.register.DTRecipes;
 import net.minecraft.core.BlockPos;
@@ -43,8 +43,8 @@ public class CrusherBlockEntity extends MachineBlockEntity<CrusherBlockEntity> i
 		}
 
 		SimpleMachineInventory inventoryWrapper = new SimpleMachineInventory(entity.inventory);
-		RecipeType<CrusherRecipe> recipeType = DTRecipes.CRUSHER_TYPE.get();
-		CrusherRecipe recipe = level.getRecipeManager()
+		RecipeType<CrushingRecipe> recipeType = DTRecipes.CRUSHING.getRecipeType();
+		CrushingRecipe recipe = level.getRecipeManager()
 				.getRecipeFor(recipeType, inventoryWrapper, level)
 				.orElse(null);
 
