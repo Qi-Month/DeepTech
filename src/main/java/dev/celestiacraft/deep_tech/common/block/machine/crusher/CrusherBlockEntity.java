@@ -8,12 +8,18 @@ import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Position;
 import dev.celestiacraft.deep_tech.common.block_entity.MachineBlockEntity;
+import dev.celestiacraft.deep_tech.common.gui.EnergyBarWidget;
 import dev.celestiacraft.deep_tech.common.inventory.SimpleMachineInventory;
 import dev.celestiacraft.deep_tech.common.register.DTBlockEntities;
 import dev.celestiacraft.deep_tech.common.register.DTRecipes;
 import dev.celestiacraft.deep_tech.common.recipe.CrusherRecipe;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -21,6 +27,8 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+
+import javax.annotation.Nullable;
 
 public class CrusherBlockEntity
         extends MachineBlockEntity
@@ -42,16 +50,12 @@ public class CrusherBlockEntity
     public static void tick(Level level, BlockPos pos, BlockState state, CrusherBlockEntity entity) {
         if (level.isClientSide) return;
 
-        // 包装为 Container
         SimpleMachineInventory inventoryWrapper = new SimpleMachineInventory(entity.inventory);
-
-        // 查找配方
         RecipeType<CrusherRecipe> recipeType = DTRecipes.CRUSHER_TYPE.get();
         CrusherRecipe recipe = level.getRecipeManager()
                 .getRecipeFor(recipeType, inventoryWrapper, level)
                 .orElse(null);
 
-        // 如果没有配方，重置状态
         if (recipe == null) {
             if (state.getValue(CrusherBlock.LIT)) {
                 level.setBlock(pos, state.setValue(CrusherBlock.LIT, false), 3);
@@ -63,10 +67,8 @@ public class CrusherBlockEntity
             return;
         }
 
-        // 获取配方数据
         ItemStack output = recipe.getOutput();
         int energyCost = recipe.getEnergyCost();
-        int processingTime = recipe.getProcessingTime();
 
         ItemStack currentOutput = entity.inventory.getStackInSlot(1);
         boolean canOutput = currentOutput.isEmpty() ||
@@ -75,43 +77,50 @@ public class CrusherBlockEntity
 
         boolean hasEnergy = entity.energy >= energyCost;
 
-        // 更新激活状态
         boolean isWorking = canOutput && hasEnergy;
         if (state.getValue(CrusherBlock.LIT) != isWorking) {
             level.setBlock(pos, state.setValue(CrusherBlock.LIT, isWorking), 3);
         }
 
-        // 执行加工
         if (isWorking) {
             entity.energy -= energyCost;
-            entity.setChanged();
             entity.progress++;
             entity.setChanged();
 
-            if(entity.progress >= recipe.getProcessingTime()) {
-                entity.inventory.getStackInSlot(0).shrink(1);
+            // 每5tick同步客户端
+            if (level.getGameTime() % 5 == 0) {
+                entity.sync();  // ✅ 现在会发送 NBT 数据
+            }
 
+            if (entity.progress >= recipe.getProcessingTime()) {
+                entity.inventory.getStackInSlot(0).shrink(1);
                 if (currentOutput.isEmpty()) {
                     entity.inventory.setStackInSlot(1, output.copy());
                 } else {
                     currentOutput.grow(output.getCount());
                 }
-
                 entity.progress = 0;
                 entity.setChanged();
+                entity.sync();  // ✅ 输出完成后同步
+
             }
+
         }
+
     }
     @Override
     public ModularUI createUI(Player player) {
 
-        return new ModularUI(
+        ModularUI ui = new ModularUI(
                 176,
                 166,
                 this,
                 player
-        ).widget(createUIWidget(player));
+        );
 
+        ui.widget(createUIWidget(player));
+
+        return ui;
     }
 
 
@@ -144,6 +153,15 @@ public class CrusherBlockEntity
 
         group.addWidget(title);
 
+        group.addWidget(
+                new EnergyBarWidget(
+                        150,
+                        25,
+                        this::getEnergyStored,
+                        getMaxEnergyStored()
+                )
+        );
+
 
 
         SimpleMachineInventory container =
@@ -151,55 +169,45 @@ public class CrusherBlockEntity
 
 
 
-        SlotWidget input =
-                new SlotWidget();
-
+        SlotWidget input = new SlotWidget();
 
         input.setContainerSlot(
                 container,
                 0
         );
 
-
         input.setSelfPosition(
-                new Position(
-                        35,
-                        60
-                )
+                new Position(35,60)
         );
-
 
         input.setBackground(
                 SlotWidget.ITEM_SLOT_TEXTURE
         );
 
+        input.setCanTakeItems(true);
+        input.setCanPutItems(true);
 
         group.addWidget(input);
 
 
 
-        SlotWidget output =
-                new SlotWidget();
-
+        SlotWidget output = new SlotWidget();
 
         output.setContainerSlot(
                 container,
                 1
         );
 
-
         output.setSelfPosition(
-                new Position(
-                        125,
-                        60
-                )
+                new Position(125,60)
         );
-
 
         output.setBackground(
                 SlotWidget.ITEM_SLOT_TEXTURE
         );
 
+        output.setCanTakeItems(true);
+        output.setCanPutItems(false);
 
         group.addWidget(output);
 
@@ -213,88 +221,10 @@ public class CrusherBlockEntity
 
         return group;
     }
-
-//    private IItemTransfer getItemTransfer() {
-//
-//        return new IItemTransfer() {
-//
-//            @Override
-//            public int getSlots() {
-//                return inventory.getSlots();
-//            }
-//
-//
-//            @Override
-//            public ItemStack getStackInSlot(int slot) {
-//                return inventory.getStackInSlot(slot);
-//            }
-//
-//
-//            @Override
-//            public ItemStack insertItem(
-//                    int slot,
-//                    ItemStack stack,
-//                    boolean simulate,
-//                    boolean notifyChanges
-//            ) {
-//                return inventory.insertItem(
-//                        slot,
-//                        stack,
-//                        simulate
-//                );
-//            }
-//
-//
-//            @Override
-//            public ItemStack extractItem(
-//                    int slot,
-//                    int amount,
-//                    boolean simulate,
-//                    boolean notifyChanges
-//            ) {
-//                return inventory.extractItem(
-//                        slot,
-//                        amount,
-//                        simulate
-//                );
-//            }
-//
-//
-//            @Override
-//            public int getSlotLimit(int slot) {
-//                return inventory.getSlotLimit(slot);
-//            }
-//
-//
-//            @Override
-//            public boolean isItemValid(
-//                    int slot,
-//                    ItemStack stack
-//            ) {
-//                return inventory.isItemValid(
-//                        slot,
-//                        stack
-//                );
-//            }
-//
-//
-//            @Override
-//            public Object createSnapshot() {
-//                return new Object();
-//            }
-//
-//
-//            @Override
-//            public void restoreFromSnapshot(Object snapshot) {
-//
-//            }
-//        };
-//    }
 private void addPlayerInventory(
         WidgetGroup group,
         Player player
 ) {
-
         Container inventory =
                 player.getInventory();
 
@@ -305,16 +235,16 @@ private void addPlayerInventory(
 
             for (int col = 0; col < 9; col++) {
 
-                SlotWidget slot =
-                        new SlotWidget();
+                SlotWidget slot = new SlotWidget();
 
+                slot.initTemplate();
 
                 slot.setContainerSlot(
                         inventory,
                         col + row * 9 + 9
                 );
 
-
+                slot.isPlayerContainer = true;
 
                 slot.setSelfPosition(
                         new Position(
@@ -322,7 +252,6 @@ private void addPlayerInventory(
                                 90 + row * 18
                         )
                 );
-
 
                 group.addWidget(slot);
             }
@@ -334,15 +263,16 @@ private void addPlayerInventory(
 
         for (int col = 0; col < 9; col++) {
 
-            SlotWidget slot =
-                    new SlotWidget();
+            SlotWidget slot = new SlotWidget();
 
+            slot.initTemplate();
 
             slot.setContainerSlot(
                     inventory,
                     col
             );
 
+            slot.isPlayerContainer = true;
 
             slot.setSelfPosition(
                     new Position(
@@ -350,7 +280,6 @@ private void addPlayerInventory(
                             148
                     )
             );
-
 
             group.addWidget(slot);
         }

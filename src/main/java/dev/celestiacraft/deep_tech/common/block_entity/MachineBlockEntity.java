@@ -5,7 +5,10 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
@@ -14,6 +17,8 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+
+import javax.annotation.Nullable;
 
 @Getter
 public abstract class MachineBlockEntity extends BasicBlockEntity {
@@ -35,6 +40,9 @@ public abstract class MachineBlockEntity extends BasicBlockEntity {
 			if (!simulate && received > 0) {
 				energy += received;
 				setChanged();
+				if (level != null && !level.isClientSide) {
+					sync();
+				}
 			}
 			return received;
 		}
@@ -45,29 +53,21 @@ public abstract class MachineBlockEntity extends BasicBlockEntity {
 			if (!simulate && extracted > 0) {
 				energy -= extracted;
 				setChanged();
+				if (level != null && !level.isClientSide) {
+					sync();
+				}
 			}
 			return extracted;
 		}
 
 		@Override
-		public int getEnergyStored() {
-			return energy;
-		}
-
+		public int getEnergyStored() { return energy; }
 		@Override
-		public int getMaxEnergyStored() {
-			return maxEnergy;
-		}
-
+		public int getMaxEnergyStored() { return maxEnergy; }
 		@Override
-		public boolean canExtract() {
-			return true;
-		}
-
+		public boolean canExtract() { return true; }
 		@Override
-		public boolean canReceive() {
-			return true;
-		}
+		public boolean canReceive() { return true; }
 	};
 
 	@Getter
@@ -76,79 +76,38 @@ public abstract class MachineBlockEntity extends BasicBlockEntity {
 		protected void onContentsChanged(int slot) {
 			setChanged();
 		}
-
-		// ✅ 外部插入限制：只能插入到输入槽（slot 0）
-		@Override
-		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-			if (slot != 0) {
-				return stack; // 不允许插入到输出槽（slot 1）和废弃槽（slot 2）
-			}
-			return super.insertItem(slot, stack, simulate);
-		}
-
-		// ✅ 外部提取限制：只能从输出槽（slot 1）提取
-		@Override
-		public ItemStack extractItem(int slot, int amount, boolean simulate) {
-			if (slot != 1) {
-				return ItemStack.EMPTY; // 不允许从输入槽（slot 0）提取
-			}
-			return super.extractItem(slot, amount, simulate);
-		}
 	};
 
-	// ========== LazyOptional（为每个方向单独包装） ==========
 	private final LazyOptional<IEnergyStorage> energyCap = LazyOptional.of(() -> energyStorage);
-
-	// ✅ 关键：根据方向返回不同的 IItemHandler 包装，控制外部访问行为
 	private final LazyOptional<IItemHandler> itemCap = LazyOptional.of(() -> new IItemHandler() {
 		@Override
-		public int getSlots() {
-			return inventory.getSlots();
-		}
-
+		public int getSlots() { return inventory.getSlots(); }
 		@Override
-		public ItemStack getStackInSlot(int slot) {
-			return inventory.getStackInSlot(slot);
-		}
-
+		public ItemStack getStackInSlot(int slot) { return inventory.getStackInSlot(slot); }
 		@Override
 		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-			// 外部只能插入到输入槽（slot 0）
-			if (slot != 0) {
-				return stack;
-			}
+			if (slot != 0) return stack;
 			return inventory.insertItem(slot, stack, simulate);
 		}
-
 		@Override
 		public ItemStack extractItem(int slot, int amount, boolean simulate) {
-			// 外部只能从输出槽（slot 1）提取
-			if (slot != 1) {
-				return ItemStack.EMPTY;
-			}
+			if (slot != 1) return ItemStack.EMPTY;
 			return inventory.extractItem(slot, amount, simulate);
 		}
-
 		@Override
-		public int getSlotLimit(int slot) {
-			return inventory.getSlotLimit(slot);
-		}
-
+		public int getSlotLimit(int slot) { return inventory.getSlotLimit(slot); }
 		@Override
 		public boolean isItemValid(int slot, ItemStack stack) {
 			return slot == 0 && inventory.isItemValid(slot, stack);
 		}
 	});
 
-
-	// ========== Capability ==========
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction side) {
 		if (capability == ForgeCapabilities.ENERGY) {
 			return energyCap.cast();
 		}
 		if (capability == ForgeCapabilities.ITEM_HANDLER) {
-			// ✅ 返回受控的物品处理器（外部无法访问内部原始 inventory）
 			return itemCap.cast();
 		}
 		return super.getCapability(capability, side);
@@ -161,13 +120,41 @@ public abstract class MachineBlockEntity extends BasicBlockEntity {
 		itemCap.invalidate();
 	}
 
-	// ========== 持久化 ==========
 	@Override
 	protected void saveAdditional(CompoundTag tag) {
 		super.saveAdditional(tag);
 		tag.put("Inventory", inventory.serializeNBT());
 		tag.putInt("Energy", energy);
 		tag.putInt("Progress", progress);
+	}
+
+	@Override
+	public CompoundTag getUpdateTag() {
+		CompoundTag tag = super.getUpdateTag();
+		tag.putInt("Energy", energy);
+		tag.putInt("Progress", progress);
+		return tag;
+	}
+	// ========== 网络同步（发送 NBT 数据包） ==========
+	@Nullable
+	@Override
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
+	}
+
+	@Override
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+		CompoundTag tag = pkt.getTag();
+		if (tag != null) {
+			handleUpdateTag(tag);
+		}
+	}
+
+	@Override
+	public void handleUpdateTag(CompoundTag tag) {
+		super.handleUpdateTag(tag);
+		energy = tag.getInt("Energy");
+		progress = tag.getInt("Progress");
 	}
 
 	@Override
@@ -178,11 +165,27 @@ public abstract class MachineBlockEntity extends BasicBlockEntity {
 		progress = tag.getInt("Progress");
 	}
 
+	@Override
+	public void onLoad() {
+		super.onLoad();
+		if (level != null && !level.isClientSide) {
+			sync();
+		}
+	}
+
 	public int getEnergyStored() {
-		return energyStorage.getEnergyStored();
+		return energy;
 	}
 
 	public int getMaxEnergyStored() {
-		return energyStorage.getMaxEnergyStored();
+		return maxEnergy;
+	}
+
+	// ✅ 同步方法：发送完整数据到客户端
+	public void sync() {
+		if (level != null && !level.isClientSide) {
+			setChanged();
+			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
+		}
 	}
 }

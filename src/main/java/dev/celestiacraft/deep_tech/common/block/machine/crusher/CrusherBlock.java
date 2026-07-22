@@ -4,30 +4,52 @@ import com.lowdragmc.lowdraglib.gui.factory.BlockEntityUIFactory;
 import dev.celestiacraft.deep_tech.common.register.DTBlockEntities;
 import dev.celestiacraft.libs.api.register.block.BasicEntityBlock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 
 public class CrusherBlock extends BasicEntityBlock {
+	// ✅ 定义方块状态属性（四方向 + 激活状态）
+	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+	public static final BooleanProperty LIT = BooleanProperty.create("lit");
+
 	public CrusherBlock(Properties properties) {
 		super(properties);
+		// ✅ 设置默认状态
+		this.registerDefaultState(this.defaultBlockState()
+				.setValue(FACING, Direction.NORTH)
+				.setValue(LIT, false));
+	}
+
+	// ✅ 注册方块状态属性
+	@Override
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		builder.add(FACING, LIT);
 	}
 
 	@Override
-	public BlockEntityType getBlockEntityType() {
+	public BlockEntityType<CrusherBlockEntity> getBlockEntityType() {
 		return DTBlockEntities.CRUSHER.get();
 	}
 
 	@Override
-	public Class getBlockEntityClass() {
+	public Class<CrusherBlockEntity> getBlockEntityClass() {
 		return CrusherBlockEntity.class;
 	}
 
@@ -47,25 +69,33 @@ public class CrusherBlock extends BasicEntityBlock {
 	}
 
 	@Override
-	public InteractionResult use(
-			BlockState state,
-			Level level,
-			BlockPos pos,
-			Player player,
-			InteractionHand hand,
-			BlockHitResult hit
-	) {
-
+	public InteractionResult use(BlockState state, Level level, BlockPos pos,
+								 Player player, InteractionHand hand, BlockHitResult hit) {
 		if (!level.isClientSide) {
 			BlockEntity blockEntity = level.getBlockEntity(pos);
 			if (blockEntity instanceof CrusherBlockEntity crusher && player instanceof ServerPlayer serverPlayer) {
-				BlockEntityUIFactory.INSTANCE.openUI(
-						crusher,
-						serverPlayer
-				);
+				BlockEntityUIFactory.INSTANCE.openUI(crusher, serverPlayer);
 			}
 		}
-
 		return InteractionResult.SUCCESS;
+	}
+	@Override
+	public BlockState getStateForPlacement(BlockPlaceContext context) {
+
+		return defaultBlockState()
+				.setValue(
+						FACING,
+						context.getHorizontalDirection()
+				);
+	}
+	@Override
+	public BlockState rotate(
+			BlockState state,
+			Rotation rotation
+	){
+		return state.setValue(
+				FACING,
+				rotation.rotate(state.getValue(FACING))
+		);
 	}
 }

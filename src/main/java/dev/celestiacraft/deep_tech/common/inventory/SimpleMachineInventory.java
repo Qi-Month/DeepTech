@@ -2,28 +2,17 @@ package dev.celestiacraft.deep_tech.common.inventory;
 
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 
-/**
- * 将 ItemStackHandler 包装为 Container，以便用于 RecipeManager
- */
 public class SimpleMachineInventory implements Container {
+
     private final ItemStackHandler handler;
 
     public SimpleMachineInventory(ItemStackHandler handler) {
         this.handler = handler;
-    }
-    public Slot getSlot(int index) {
-        return new Slot(
-                this,
-                index,
-                0,
-                0
-        );
     }
 
     @Override
@@ -42,19 +31,17 @@ public class SimpleMachineInventory implements Container {
     }
 
     @Override
-    @Nonnull
     public ItemStack getItem(int slot) {
         return handler.getStackInSlot(slot);
     }
 
     @Override
-    @Nonnull
     public ItemStack removeItem(int slot, int amount) {
+        // ✅ 直接提取，不需要额外的 set
         return handler.extractItem(slot, amount, false);
     }
 
     @Override
-    @Nonnull
     public ItemStack removeItemNoUpdate(int slot) {
         ItemStack stack = handler.getStackInSlot(slot);
         handler.setStackInSlot(slot, ItemStack.EMPTY);
@@ -62,17 +49,17 @@ public class SimpleMachineInventory implements Container {
     }
 
     @Override
-    public void setItem(int slot, @Nonnull ItemStack stack) {
+    public void setItem(int slot, ItemStack stack) {
         handler.setStackInSlot(slot, stack);
     }
 
     @Override
     public void setChanged() {
-        // 不需要操作，因为 ItemStackHandler 有独立的 change 通知
+        // 不需要操作，ItemStackHandler 有自己的 change 通知
     }
 
     @Override
-    public boolean stillValid(@Nonnull Player player) {
+    public boolean stillValid(Player player) {
         return true;
     }
 

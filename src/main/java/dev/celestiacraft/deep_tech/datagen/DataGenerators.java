@@ -1,8 +1,6 @@
 package dev.celestiacraft.deep_tech.datagen;
 import dev.celestiacraft.deep_tech.DeepTech;
 import dev.celestiacraft.deep_tech.datagen.language.LanguageGenerate;
-import dev.celestiacraft.deep_tech.datagen.language.locale.Chinese;
-import dev.celestiacraft.deep_tech.datagen.language.locale.English;
 import dev.celestiacraft.deep_tech.datagen.tags.DTBlockTagsProvider;
 import dev.celestiacraft.deep_tech.datagen.tags.DTFluidTagsProvider;
 import dev.celestiacraft.deep_tech.datagen.tags.DTItemTagsProvider;
@@ -29,8 +27,6 @@ public class DataGenerators {
 
 		// Client
 		LanguageGenerate.register();
-		generator.addProvider(client, new English(output));
-		generator.addProvider(client, new Chinese(output));
 
 		// Server
 		DTBlockTagsProvider blockTags = new DTBlockTagsProvider(output, provider, helper);
