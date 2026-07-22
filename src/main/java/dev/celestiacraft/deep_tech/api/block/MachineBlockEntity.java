@@ -1,4 +1,4 @@
-package dev.celestiacraft.deep_tech.common.block_entity;
+package dev.celestiacraft.deep_tech.api.block;
 
 import dev.celestiacraft.libs.api.register.block.BasicBlockEntity;
 import dev.celestiacraft.libs.api.register.block.ITickableBlockEntity;
