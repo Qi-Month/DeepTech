@@ -1,5 +1,6 @@
 package dev.celestiacraft.deep_tech.common.register;
 
+import com.tterrag.registrate.Registrate;
 import dev.celestiacraft.deep_tech.DeepTech;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -31,14 +32,15 @@ public class DTCreativeTabs {
 			return CreativeModeTab.builder()
 					.icon(icon)
 					.title(Component.translatable(tranKey))
-					.displayItems((params, output) -> {
-						output.accept(DTItems.SCULK_CHUNK.get());
-						output.accept(DTItems.SCULK_ALLOY.get());
-						output.accept(DTBlocks.MACHINE_FRAME.get().asItem());
-						output.accept(DTBlocks.MACHINE_CRUSHER.get().asItem());
-					})
 					.build();
 		});
+	}
+
+	public static Registrate getTab(String name) {
+		return DeepTech.REGISTRATE.defaultCreativeTab(ResourceKey.create(
+				Registries.CREATIVE_MODE_TAB,
+				DeepTech.loadResource(name)
+		));
 	}
 
 	public static ResourceKey<CreativeModeTab> getTabKey(String name) {
