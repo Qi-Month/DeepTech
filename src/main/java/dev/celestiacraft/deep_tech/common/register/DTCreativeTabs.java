@@ -9,23 +9,24 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
 
 import java.util.function.Supplier;
 
 public class DTCreativeTabs {
 	public static final DeferredRegister<CreativeModeTab> TABS;
 
-	public static final RegistryObject<CreativeModeTab>
-			MATERIAL;
+	public static final Supplier<CreativeModeTab>
+			MATERIAL,
+			MACHINE;
 
 	static {
 		TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, DeepTech.MODID);
 
 		MATERIAL = addCreativeModeTab("material", DTItems.SCULK_CHUNK::asStack);
+		MACHINE = addCreativeModeTab("machine", DTBlocks.MACHINE_CRUSHER::asStack);
 	}
 
-	private static RegistryObject<CreativeModeTab> addCreativeModeTab(String name, Supplier<ItemStack> icon) {
+	private static Supplier<CreativeModeTab> addCreativeModeTab(String name, Supplier<ItemStack> icon) {
 		return TABS.register(name, () -> {
 			String tranKey = String.format("itemGroup.%s.%s", DeepTech.MODID, name);
 			return CreativeModeTab.builder()

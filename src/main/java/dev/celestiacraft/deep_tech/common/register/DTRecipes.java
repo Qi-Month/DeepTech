@@ -1,8 +1,8 @@
 package dev.celestiacraft.deep_tech.common.register;
 
 import dev.celestiacraft.deep_tech.DeepTech;
-import dev.celestiacraft.deep_tech.common.recipe.CrusherRecipe;
-import dev.celestiacraft.deep_tech.common.recipe.CrusherRecipeSerializer;
+import dev.celestiacraft.deep_tech.common.recipe.cursher.CrusherRecipe;
+import dev.celestiacraft.deep_tech.common.recipe.cursher.CrusherRecipeSerializer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
